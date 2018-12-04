@@ -5,10 +5,17 @@ module Jobs
     def execute(args)
       payload = args['payload']
 
+      # The user who should receive the notification
+      # acted_on_user = args["user"]
+      # The user who took action to trigger the notification
+      # actor_user = User.find_by(username: payload[:username])
+
+      # heading = actor_user.name
+
       params = {
         'app_id' => SiteSetting.onesignal_app_id,
-        'contents' => { 'en' => "#{payload[:username]}: #{payload[:excerpt]}" },
-        'headings' => { 'en' => payload[:topic_title] },
+        'contents' => { 'en' => payload[:excerpt] },
+        'headings' => { 'en' => payload[:username] },
         'data' => payload,
         'ios_badgeType' => 'Increase',
         'ios_badgeCount' => '1',
