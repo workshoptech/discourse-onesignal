@@ -5,5 +5,3 @@ plugins:
     default: ''
   onesignal_rest_api_key:
     default: ''
-  onesignal_env_string:
-    default: ''
