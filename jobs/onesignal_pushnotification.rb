@@ -1,5 +1,5 @@
 module Jobs
-  class OnesignalPushnotification < Jobs::Onceoff
+  class OnesignalPushnotification < Jobs::Base
     def execute(args)
       payload = args['payload']
 
