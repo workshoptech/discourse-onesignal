@@ -57,11 +57,12 @@ after_initialize do
           end
 
           filters = [
-            {"field": "tag", "key": "username", "relation": "=", "value": args["username"]},
+            { field: 'tag', key: 'username', relation: '=', value: args['username'] },
           ]
 
           if SiteSetting.onesignal_rest_api_key.present?
-            filters.push({"field": "tag", "key": "env", "relation": "=", "value": SiteSetting.onesignal_rest_api_key})
+            Rails.logger.info("OneSignal filtering on environment env = #{SiteSetting.onesignal_rest_api_key}.")
+            filters << { field: 'tag', key: 'env', relation: '=', value: SiteSetting.onesignal_rest_api_key }
           end
 
           params = {
