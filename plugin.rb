@@ -6,7 +6,7 @@
 
 after_initialize do
   if SiteSetting.onesignal_push_enabled
-    load File.expand_path('jobs/blog_update_twitter.rb', __dir__)
+    load File.expand_path('jobs/onesignal_pushnotification.rb', __dir__)
 
     ONESIGNALAPI = 'https://onesignal.com/api/v1/notifications'.freeze
 
