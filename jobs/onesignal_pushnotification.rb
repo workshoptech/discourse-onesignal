@@ -4,17 +4,48 @@ module Jobs
 
     def execute(args)
       payload = args['payload']
+      # The user who should receive the notification
+      # acted_on_user = args["user"]
+      # The user who took action to trigger the notification
+      actor_user = User.find_by(username: payload[:username])
+
+      contents = payload[:excerpt]
+      heading = case payload[:notification_type]
+      when 1
+        # Mentioned: 1
+        "#{actor_user.name} mentioned you"
+      when 2
+        # Replied: 2
+        "#{actor_user.name} replied to you"
+      when 3
+        # Quoted: 3
+        "#{actor_user.name} quoted you"
+      when 15
+        # Group Mention: 15
+        "#{actor_user.name} mentioned your group"
+      else
+        # Private Message: 6
+        # Posted: 9
+        # Linked: 11
+        actor_user.name
+      end
+
+      filters = [
+        { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] }
+      ]
+
+      if SiteSetting.onesignal_rest_api_key.present?
+        filters << { "field": 'tag', "key": 'env', "relation": '=', "value": SiteSetting.onesignal_rest_api_key }
+      end
 
       params = {
         'app_id' => SiteSetting.onesignal_app_id,
-        'contents' => { 'en' => "#{payload[:username]}: #{payload[:excerpt]}" },
-        'headings' => { 'en' => payload[:topic_title] },
+        'contents' => { 'en' => contents },
+        'headings' => { 'en' => heading },
         'data' => payload,
         'ios_badgeType' => 'Increase',
         'ios_badgeCount' => '1',
-        'filters' => [
-          { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] }
-        ]
+        'filters' => filters
       }
 
       uri = URI.parse(ONESIGNALAPI)
