@@ -9,6 +9,8 @@ after_initialize do
     ONESIGNALAPI = 'https://onesignal.com/api/v1/notifications'.freeze
 
     DiscourseEvent.on(:post_notification_alert) do |user, payload|
+      Rails.logger.info('Post notification alert received for OneSignal plugin')
+
       if SiteSetting.onesignal_app_id.nil? || SiteSetting.onesignal_app_id.empty?
         Rails.logger.warn('OneSignal App ID is missing')
         return
@@ -17,7 +19,8 @@ after_initialize do
         Rails.logger.warn('OneSignal REST API Key is missing')
         return
       end
-
+      
+      Rails.logger.info('Queueing OnesignalPushnotification')
       Jobs.enqueue(:onesignal_pushnotification, payload: payload, username: user.username)
     end
 
@@ -71,9 +74,7 @@ after_initialize do
             'data' => payload,
             'ios_badgeType' => 'Increase',
             'ios_badgeCount' => '1',
-            'filters' => filters,
-            'android_group' => 'workshop_discourse_onesignal',
-            'thread_id' => 'workshop_discourse_onesignal'
+            'filters' => filters
           }
           Rails.logger.info('OneSignal Push Notification sending')
           uri = URI.parse(ONESIGNALAPI)
