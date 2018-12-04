@@ -8,8 +8,6 @@ after_initialize do
   if SiteSetting.onesignal_push_enabled
     load File.expand_path('jobs/onesignal_pushnotification.rb', __dir__)
 
-    ONESIGNALAPI = 'https://onesignal.com/api/v1/notifications'.freeze
-
     DiscourseEvent.on(:post_notification_alert) do |user, payload|
       if SiteSetting.onesignal_app_id.nil? || SiteSetting.onesignal_app_id.empty?
         Rails.logger.warn('OneSignal App ID is missing')

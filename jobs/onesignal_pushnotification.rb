@@ -1,5 +1,7 @@
 module Jobs
   class OnesignalPushnotification < Jobs::Base
+    ONESIGNALAPI = 'https://onesignal.com/api/v1/notifications'.freeze
+
     def execute(args)
       payload = args['payload']
 
