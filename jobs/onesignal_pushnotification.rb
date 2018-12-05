@@ -10,11 +10,14 @@ module Jobs
       # The user who took action to trigger the notification
       actor_user = User.find_by(username: payload[:username])
 
+      # Get the post which triggered the notification
+      post = Post.find_by('topic_id = :topic_id AND post_number = :post_number', topic_id: payload[:topic_id], post_number: payload[:post_number])
+
       heading = actor_user.name
 
       params = {
         'app_id' => SiteSetting.onesignal_app_id,
-        'contents' => { 'en' => payload[:excerpt] },
+        'contents' => { 'en' => post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true) },
         'headings' => { 'en' => heading },
         'data' => payload,
         'ios_badgeType' => 'Increase',
