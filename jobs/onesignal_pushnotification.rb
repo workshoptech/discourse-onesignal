@@ -10,8 +10,11 @@ module Jobs
       # The user who took action to trigger the notification
       actor_user = User.find_by(username: payload[:username])
 
-      # Get the post which triggered the notification
-      post = Post.find_by('topic_id = :topic_id AND post_number = :post_number', topic_id: payload[:topic_id], post_number: payload[:post_number])
+      # Get the most recent post in the topic for which the notification was
+      # triggered which is from the actor user. This is the post for which
+      # we want to show the notification
+      topic = Topic.find(payload[:topic_id])
+      post = topic.posts.where(user_id: actor_user.id).last
 
       heading = actor_user.name
 
