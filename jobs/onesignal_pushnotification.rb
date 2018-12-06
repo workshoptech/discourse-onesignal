@@ -6,7 +6,7 @@ module Jobs
       payload = args['payload']
 
       # The user who should receive the notification
-      acted_on_user = args['user']
+      # acted_on_user = args['user']
       # The user who took action to trigger the notification
       actor_user = User.find_by(username: payload[:username])
 
@@ -20,23 +20,23 @@ module Jobs
       heading = actor_user.name
 
       # If the post is a reply and the user of that post is the acted_on_user
-      if post.reply_to_post_number? && post.reply_to_user_id == acted_on_user.id
-        # Replied to your comment
-        if post.archetype == 'regular'
-          heading = "#{actor_user.name} replied to your comment"
-        end
-        # Replied to your message (replied to you)
-      elsif topic.user_id == acted_on_user.id
-        # if original poster on topic is acted_on_user
-        # Commented on your post (if acted_on_user is post user)
-        if post.archetype == 'regular'
-          heading = "#{actor_user.name} commented on your post"
-        end
-        # if archetype is private_message
-        # Just carry on
-      else
-        return
-      end
+      # if post.reply_to_post_number? && post.reply_to_user_id == acted_on_user.id
+      #   # Replied to your comment
+      #   if post.archetype == 'regular'
+      #     heading = "#{actor_user.name} replied to your comment"
+      #   end
+      #   # Replied to your message (replied to you)
+      # elsif topic.user_id == acted_on_user.id
+      #   # if original poster on topic is acted_on_user
+      #   # Commented on your post (if acted_on_user is post user)
+      #   if post.archetype == 'regular'
+      #     heading = "#{actor_user.name} commented on your post"
+      #   end
+      #   # if archetype is private_message
+      #   # Just carry on
+      # else
+      #   return
+      # end
 
       params = {
         'app_id' => SiteSetting.onesignal_app_id,
