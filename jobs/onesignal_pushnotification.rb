@@ -51,7 +51,7 @@ module Jobs
         'filters' => [
           { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] }
         ],
-        'redirectUri' => 'Course',
+        'redirectUri' => 'Discussion',
         'redirectProps' => { 'slug' => 'essential-cooking' }
       }
 
