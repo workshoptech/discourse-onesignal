@@ -37,7 +37,7 @@ module Jobs
       # else
       #   return
       # end
-      
+
       # We never want to show the system user as a heading
       heading = 'Workshop' if heading == 'system'
 
@@ -45,14 +45,12 @@ module Jobs
         'app_id' => SiteSetting.onesignal_app_id,
         'contents' => { 'en' => post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true) },
         'headings' => { 'en' => heading },
-        'data' => payload,
+        'data' => payload.merge('redirectUri' => 'Discussion', 'redirectProps' => { 'slug' => 'essential-cooking' }),
         'ios_badgeType' => 'Increase',
         'ios_badgeCount' => '1',
         'filters' => [
           { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] }
-        ],
-        'redirectUri' => 'Discussion',
-        'redirectProps' => { 'slug' => 'essential-cooking' }
+        ]
       }
 
       uri = URI.parse(ONESIGNALAPI)
