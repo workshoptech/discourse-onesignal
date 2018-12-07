@@ -45,7 +45,7 @@ module Jobs
         'app_id' => SiteSetting.onesignal_app_id,
         'contents' => { 'en' => post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true) },
         'headings' => { 'en' => heading },
-        'data' => payload.merge('redirectUri' => 'Discussion', 'redirectProps' => { 'slug' => 'essential-cooking' }),
+        'data' => payload.merge('isDeepLink' => true, 'redirectUri' => 'Discussion', 'redirectProps' => { 'slug' => 'essential-cooking' }),
         'ios_badgeType' => 'Increase',
         'ios_badgeCount' => '1',
         'filters' => [
