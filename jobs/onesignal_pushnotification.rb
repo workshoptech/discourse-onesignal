@@ -37,6 +37,9 @@ module Jobs
       # else
       #   return
       # end
+      
+      # We never want to show the system user as a heading
+      heading = 'Workshop' if heading == 'system'
 
       params = {
         'app_id' => SiteSetting.onesignal_app_id,
@@ -47,7 +50,9 @@ module Jobs
         'ios_badgeCount' => '1',
         'filters' => [
           { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] }
-        ]
+        ],
+        'redirectUri' => 'Course',
+        'redirectProps' => { 'slug' => 'essential-cooking' }
       }
 
       uri = URI.parse(ONESIGNALAPI)
