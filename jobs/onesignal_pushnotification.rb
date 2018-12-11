@@ -41,6 +41,23 @@ module Jobs
       # We never want to show the system user as a heading
       heading = 'Workshop' if heading == 'system'
 
+      # Create the filters map
+      filters = [
+        { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] },
+        { "field": 'tag', "key": 'env', "relation": '=', "value": SiteSetting.onesignal_env_string }
+      ]
+
+      # Only send certain notification types if the user has those types enabled
+      if payload[:notification_type] == Notification.types[:replied]
+        filters.push("field": 'tag', "key": 'repliedNotificationEnabled', "relation": '=', "value": 'true')
+      elsif payload[:notification_type] == Notification.types[:posted]
+        filters.push("field": 'tag', "key": 'postedNotificationEnabled', "relation": '=', "value": 'true')
+      elsif payload[:notification_type] == Notification.types[:private_message]
+        filters.push("field": 'tag', "key": 'privateMessageNotificationEnabled', "relation": '=', "value": 'true')
+      elsif payload[:notification_type] == Notification.types[:group_mentioned]
+        filters.push("field": 'tag', "key": 'groupMessageNotificationEnabled', "relation": '=', "value": 'true')
+      end
+
       params = {
         'app_id' => SiteSetting.onesignal_app_id,
         'contents' => { 'en' => post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true) },
@@ -49,14 +66,7 @@ module Jobs
         'ios_badgeType' => 'Increase',
         'ios_badgeCount' => '1',
         'android_group' => "cohort_notifications_#{payload[:topic_id]}",
-        'filters' => [
-          { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] },
-          { "field": 'tag', "key": 'env', "relation": '=', "value": SiteSetting.onesignal_env_string },
-          { "field": 'tag', "key": 'repliedNotificationEnabled', "relation": '=', "value": 'true' },
-          { "field": 'tag', "key": 'postedNotificationEnabled', "relation": '=', "value": 'true' },
-          { "field": 'tag', "key": 'privateMessageNotificationEnabled', "relation": '=', "value": 'true' },
-          { "field": 'tag', "key": 'groupMessageNotificationEnabled', "relation": '=', "value": 'true' }
-        ]
+        'filters' => filters
       }
 
       uri = URI.parse(ONESIGNALAPI)
