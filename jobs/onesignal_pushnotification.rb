@@ -50,6 +50,10 @@ module Jobs
         'ios_badgeCount' => '1',
         'filters' => [
           { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] }
+          { "field": 'tag', "key": 'repliedNotificationEnabled', "relation": '=', "value": "true" }
+          { "field": 'tag', "key": 'postedNotificationEnabled', "relation": '=', "value": "true" }
+          { "field": 'tag', "key": 'privateMessageNotificationEnabled', "relation": '=', "value": "true" }
+          { "field": 'tag', "key": 'groupMessageNotificationEnabled', "relation": '=', "value": "true" }
         ]
       }
 
