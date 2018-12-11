@@ -48,8 +48,14 @@ module Jobs
         'data' => payload.merge('isDeepLink' => true, 'redirectUri' => 'Discussion', 'redirectProps' => { 'slug' => 'essential-cooking' }),
         'ios_badgeType' => 'Increase',
         'ios_badgeCount' => '1',
+        'android_group' => "cohort_notifications_#{payload[:topic_id]}",
         'filters' => [
-          { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] }
+          { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] },
+          { "field": 'tag', "key": 'env', "relation": '=', "value": SiteSetting.onesignal_env_string },
+          { "field": 'tag', "key": 'repliedNotificationEnabled', "relation": '=', "value": 'true' },
+          { "field": 'tag', "key": 'postedNotificationEnabled', "relation": '=', "value": 'true' },
+          { "field": 'tag', "key": 'privateMessageNotificationEnabled', "relation": '=', "value": 'true' },
+          { "field": 'tag', "key": 'groupMessageNotificationEnabled', "relation": '=', "value": 'true' }
         ]
       }
 
