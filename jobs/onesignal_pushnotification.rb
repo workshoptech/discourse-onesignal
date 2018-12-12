@@ -54,8 +54,6 @@ module Jobs
         filters.push("field": 'tag', "key": 'postedNotificationEnabled', "relation": '=', "value": 'true')
       elsif payload[:notification_type] == Notification.types[:private_message]
         filters.push("field": 'tag', "key": 'privateMessageNotificationEnabled', "relation": '=', "value": 'true')
-      elsif payload[:notification_type] == Notification.types[:group_mentioned]
-        filters.push("field": 'tag', "key": 'groupMessageNotificationEnabled', "relation": '=', "value": 'true')
       end
 
       params = {
