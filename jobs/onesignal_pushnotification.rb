@@ -22,6 +22,11 @@ module Jobs
       user_id = nil
       user_id = acted_on_user.id unless acted_on_user.nil?
 
+      username = acted_on_user.username unless acted_on_user.nil?
+
+      Rails.logger.warn("Acted On User: #{username}")
+      Rails.logger.warn("Actor User: #{actor_user.username}")
+
       # Attempt to extract course related information
       course_title = nil
       subtitle = nil
@@ -92,6 +97,8 @@ module Jobs
       # We never want to show the system user as a heading
       heading = 'Workshop' if heading == 'system'
 
+      Rails.logger.warn("Sending To: #{args['username']}")
+
       # Create the filters map
       filters = [
         { "field": 'tag', "key": 'username', "relation": '=', "value": args['username'] },
@@ -117,6 +124,8 @@ module Jobs
         'android_group' => "cohort_notifications_#{payload[:topic_id]}",
         'filters' => filters
       }
+
+      Rails.logger.warn("PARAMS BUILT")
 
       uri = URI.parse(ONESIGNALAPI)
       http = Net::HTTP.new(uri.host, uri.port)
