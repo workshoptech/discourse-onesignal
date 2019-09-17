@@ -18,6 +18,10 @@ module Jobs
 
       # Build the correct notification heading
       heading = actor_user.name
+      
+      user_id = nil
+      if acted_on_user?
+        user_id = acted_on_user.id
 
       # Attempt to extract course related information
       course_title = nil
@@ -39,7 +43,7 @@ module Jobs
 
       redirect_uri = 'Explore'
       # If the post is a reply and the user of that post is the acted_on_user
-      if post.reply_to_post_number? && post.reply_to_user_id == acted_on_user.id
+      if post.reply_to_post_number? && post.reply_to_user_id == user_id
         # Replied to your comment
         if post.archetype == Archetype.default
           redirect_uri = 'ClassFeedback'
@@ -51,7 +55,7 @@ module Jobs
           end
         end
         # Replied to your message (replied to you)
-      elsif topic.user_id == acted_on_user.id
+      elsif topic.user_id == user_id
         # if original poster on topic is acted_on_user
         # Commented on your post (if acted_on_user is post user)
         if post.archetype == Archetype.default
