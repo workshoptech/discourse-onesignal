@@ -6,7 +6,7 @@ module Jobs
       payload = args['payload']
 
       # The user who should receive the notification
-      # acted_on_user = args['user']
+      acted_on_user = args['user']
       # The user who took action to trigger the notification
       actor_user = User.find_by(username: payload[:username])
 
@@ -19,24 +19,72 @@ module Jobs
       # Build the correct notification heading
       heading = actor_user.name
 
+      # Attempt to extract course related information
+      course_title = nil
+      subtitle = nil
+      icon_name = nil
+      if topic.category_id?
+        # If a category exists, we can extract the course slug from it. Note that
+        # it's normal to have one level of nesting on the category which the topic
+        # is associated to, but this isn't always the case.
+        category = Category.find(topic.category_id)
+
+        if category.parent_category_id?
+          parent = Category.find(category.parent_category_id)
+          course_title = parent.name
+        else
+          course_title = category.name
+        end
+      end
+
+      redirect_uri = 'Explore'
       # If the post is a reply and the user of that post is the acted_on_user
-      # if post.reply_to_post_number? && post.reply_to_user_id == acted_on_user.id
-      #   # Replied to your comment
-      #   if post.archetype == 'regular'
-      #     heading = "#{actor_user.name} replied to your comment"
-      #   end
-      #   # Replied to your message (replied to you)
-      # elsif topic.user_id == acted_on_user.id
-      #   # if original poster on topic is acted_on_user
-      #   # Commented on your post (if acted_on_user is post user)
-      #   if post.archetype == 'regular'
-      #     heading = "#{actor_user.name} commented on your post"
-      #   end
-      #   # if archetype is private_message
-      #   # Just carry on
-      # else
-      #   return
-      # end
+      if post.reply_to_post_number? && post.reply_to_user_id == acted_on_user.id
+        # Replied to your comment
+        if post.archetype == Archetype.default
+          redirect_uri = 'ClassFeedback'
+          subtitle = 'Post Feedback'
+          if payload[:notification_type] == Notification.types[:replied]
+            heading = "#{actor_user.name} replied to your comment"
+          elsif payload[:notification_type] == Notification.types[:liked]
+            heading = "#{actor_user.name} liked your comment"
+          end
+        end
+        # Replied to your message (replied to you)
+      elsif topic.user_id == acted_on_user.id
+        # if original poster on topic is acted_on_user
+        # Commented on your post (if acted_on_user is post user)
+        if post.archetype == Archetype.default
+          redirect_uri = 'ClassFeedback'
+          subtitle = 'Post Feedback'
+          if payload[:notification_type] == Notification.types[:posted]
+            heading = "#{actor_user.name} commented on your post"
+          elsif payload[:notification_type] == Notification.types[:liked]
+            heading = "#{actor_user.name} liked your post"
+          end
+        end
+      elsif post.archetype == Archetype.private_message
+        # if archetype is private_message
+        redirect_uri = 'PrivateMessage'
+        # If it's a private message we need to determine whether it's:
+        # - A private message between 2 students (default assumption)
+        # - A group chat message
+        # - A support chat message
+        subtitle = heading
+        icon_name = 'message'
+
+        # Is it a group chat?
+        if topic.title.include? 'Group Chat'
+          subtitle = 'Class Discussion'
+          icon_name = 'group'
+        end
+
+        # Is it a support message?
+        if actor_user.username == 'workshop_support'
+          subtitle = 'Workshop Support'
+          icon_name = 'help_outline'
+        end
+      end
 
       # We never want to show the system user as a heading
       heading = 'Workshop' if heading == 'system'
@@ -60,7 +108,7 @@ module Jobs
         'app_id' => SiteSetting.onesignal_app_id,
         'contents' => { 'en' => post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true) },
         'headings' => { 'en' => heading },
-        'data' => payload.merge('isDeepLink' => true, 'redirectUri' => 'Discussion', 'redirectProps' => { 'slug' => 'essential-cooking' }),
+        'data' => payload.merge('redirectUri' => redirect_uri, 'redirectProps' => { 'title' => course_title, 'subtitle': subtitle, 'icon': icon_name }),
         'ios_badgeType' => 'Increase',
         'ios_badgeCount' => '1',
         'android_group' => "cohort_notifications_#{payload[:topic_id]}",
