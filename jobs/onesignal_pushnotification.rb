@@ -18,10 +18,9 @@ module Jobs
 
       # Build the correct notification heading
       heading = actor_user.name
-      
+
       user_id = nil
-      if acted_on_user?
-        user_id = acted_on_user.id
+      user_id = acted_on_user.id if acted_on_user?
 
       # Attempt to extract course related information
       course_title = nil
