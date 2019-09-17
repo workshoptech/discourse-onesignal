@@ -20,7 +20,7 @@ module Jobs
       heading = actor_user.name
 
       user_id = nil
-      user_id = acted_on_user.id if acted_on_user?
+      user_id = acted_on_user.id unless acted_on_user.nil?
 
       # Attempt to extract course related information
       course_title = nil
