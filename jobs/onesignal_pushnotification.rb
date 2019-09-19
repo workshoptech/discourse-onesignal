@@ -95,9 +95,10 @@ module Jobs
       # Format the contents - if the notification is for a post on a topic,
       # include the users name in the contents of the notification.
       contents = post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true)
-      
+
       if redirect_uri == 'FeedbackTopic'
-        contents = "#{actor_user.name}: #{post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true)}" 
+        contents = "#{actor_user.name}: #{post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true)}"
+      end
 
       # Create the filters map
       filters = [
