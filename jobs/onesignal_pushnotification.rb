@@ -74,7 +74,6 @@ module Jobs
         # - A group chat message
         # - A support chat message
         subtitle = heading
-        icon_name = 'message'
 
         # Is it a group chat?
         if topic.title.include? 'Group Chat'
