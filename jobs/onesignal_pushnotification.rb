@@ -22,11 +22,6 @@ module Jobs
       user_id = nil
       user_id = acted_on_user.id unless acted_on_user.nil?
 
-      username = acted_on_user.username unless acted_on_user.nil?
-
-      Rails.logger.warn("Acted On User: #{username}")
-      Rails.logger.warn("Actor User: #{actor_user.username}")
-
       # Attempt to extract course related information
       course_title = nil
       subtitle = nil
@@ -45,17 +40,15 @@ module Jobs
         end
       end
 
-      Rails.logger.warn("Topic User, User ID: #{topic.user_id}, #{user_id}")
-
       redirect_uri = 'Explore'
       # If the post is a reply and the user of that post is the acted_on_user
       if post.reply_to_post_number? && post.reply_to_user_id == user_id
         # Replied to your comment
         if post.archetype == Archetype.default
-          redirect_uri = 'ClassFeedback'
+          redirect_uri = 'FeedbackTopic'
           subtitle = 'Post Feedback'
           if payload[:notification_type] == Notification.types[:replied]
-            heading = "#{actor_user.name} replied to your comment"
+            heading = 'New reply to your comment'
           elsif payload[:notification_type] == Notification.types[:liked]
             heading = "#{actor_user.name} liked your comment"
           end
@@ -65,10 +58,10 @@ module Jobs
         # if original poster on topic is acted_on_user
         # Commented on your post (if acted_on_user is post user)
         if post.archetype == Archetype.default
-          redirect_uri = 'ClassFeedback'
+          redirect_uri = 'FeedbackTopic'
           subtitle = 'Post Feedback'
           if payload[:notification_type] == Notification.types[:posted]
-            heading = "#{actor_user.name} commented on your post"
+            heading = 'New comment on your post'
           elsif payload[:notification_type] == Notification.types[:liked]
             heading = "#{actor_user.name} liked your post"
           end
@@ -99,7 +92,12 @@ module Jobs
       # We never want to show the system user as a heading
       heading = 'Workshop' if heading == 'system'
 
-      Rails.logger.warn("Sending To: #{args['username']}")
+      # Format the contents - if the notification is for a post on a topic,
+      # include the users name in the contents of the notification.
+      contents = post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true)
+      
+      if redirect_uri == 'FeedbackTopic'
+        contents = "#{actor_user.name}: #{post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true)}" 
 
       # Create the filters map
       filters = [
@@ -118,7 +116,7 @@ module Jobs
 
       params = {
         'app_id' => SiteSetting.onesignal_app_id,
-        'contents' => { 'en' => post.excerpt(400, text_entities: true, strip_links: true, remap_emoji: true) },
+        'contents' => { 'en' => contents },
         'headings' => { 'en' => heading },
         'data' => payload.merge('redirectUri' => redirect_uri, 'redirectProps' => { 'title' => course_title, 'subtitle': subtitle, 'icon': icon_name }),
         'ios_badgeType' => 'Increase',
@@ -126,8 +124,6 @@ module Jobs
         'android_group' => "cohort_notifications_#{payload[:topic_id]}",
         'filters' => filters
       }
-
-      Rails.logger.warn("PARAMS BUILT")
 
       uri = URI.parse(ONESIGNALAPI)
       http = Net::HTTP.new(uri.host, uri.port)
