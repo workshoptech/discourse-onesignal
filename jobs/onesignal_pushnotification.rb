@@ -6,7 +6,7 @@ module Jobs
       payload = args['payload']
 
       # The user who should receive the notification
-      acted_on_user = args['user']
+      acted_on_user = User.find_by(username: args[:username])
       # The user who took action to trigger the notification
       actor_user = User.find_by(username: payload[:username])
 
@@ -44,6 +44,8 @@ module Jobs
           course_title = category.name
         end
       end
+
+      Rails.logger.warn("Topic User, User ID: #{topic.user_id}, #{user_id}")
 
       redirect_uri = 'Explore'
       # If the post is a reply and the user of that post is the acted_on_user
