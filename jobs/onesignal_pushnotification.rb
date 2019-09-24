@@ -42,7 +42,8 @@ module Jobs
 
       redirect_uri = 'Explore'
       # If the post is a reply and the user of that post is the acted_on_user
-      if post.reply_to_post_number? && post.reply_to_user_id == user_id
+      # and the post is specifically not a PM
+      if post.archetype != Archetype.private_message && post.reply_to_post_number? && post.reply_to_user_id == user_id
         # Replied to your comment
         if post.archetype == Archetype.default
           redirect_uri = 'FeedbackTopic'
@@ -53,8 +54,9 @@ module Jobs
             heading = "#{actor_user.name} liked your comment"
           end
         end
-        # Replied to your message (replied to you)
-      elsif topic.user_id == user_id
+      # Replied to your message (replied to you) and the post is specifically 
+      # not a PM
+      elsif post.archetype != Archetype.private_message && topic.user_id == user_id
         # if original poster on topic is acted_on_user
         # Commented on your post (if acted_on_user is post user)
         if post.archetype == Archetype.default
