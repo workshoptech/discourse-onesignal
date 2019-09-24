@@ -86,7 +86,7 @@ module Jobs
         # Is it a support message?
         if actor_user.username == 'workshop_support'
           subtitle = 'Workshop Support'
-          icon_name = 'help_outline'
+          icon_name = 'help-outline'
         end
       end
 
