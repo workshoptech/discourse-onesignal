@@ -121,8 +121,6 @@ module Jobs
         filters.push("field": 'tag', "key": 'privateMessageNotificationEnabled', "relation": '=', "value": 'true')
       end
 
-      Rails.logger.warn("Params Built")
-
       params = {
         'app_id' => SiteSetting.onesignal_app_id,
         'contents' => { 'en' => contents },
@@ -133,6 +131,9 @@ module Jobs
         'android_group' => "cohort_notifications_#{payload[:topic_id]}",
         'filters' => filters
       }
+
+      Rails.logger.warn("Params Built")
+      Rails.logger.warn("#{params.to_yaml}")
 
       uri = URI.parse(ONESIGNALAPI)
       http = Net::HTTP.new(uri.host, uri.port)
