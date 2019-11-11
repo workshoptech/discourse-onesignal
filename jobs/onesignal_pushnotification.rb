@@ -10,6 +10,9 @@ module Jobs
       # The user who took action to trigger the notification
       actor_user = User.find_by(username: payload[:username])
 
+      Rails.logger.warn("Acted On User: #{acted_on_user.username}")
+      Rails.logger.warn("Actor User: #{actor_user.username}")
+
       # Get the most recent post in the topic for which the notification was
       # triggered which is from the actor user. This is the post for which
       # we want to show the notification
@@ -39,6 +42,8 @@ module Jobs
           course_title = category.name
         end
       end
+
+      Rails.logger.warn("Archetype: #{post.archetype}")
 
       redirect_uri = 'Explore'
       # If the post is a reply and the user of that post is the acted_on_user
@@ -115,6 +120,8 @@ module Jobs
       elsif payload[:notification_type] == Notification.types[:private_message]
         filters.push("field": 'tag', "key": 'privateMessageNotificationEnabled', "relation": '=', "value": 'true')
       end
+
+      Rails.logger.warn("Params Built")
 
       params = {
         'app_id' => SiteSetting.onesignal_app_id,
