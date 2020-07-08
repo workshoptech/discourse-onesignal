@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module Jobs
   class OnesignalPushnotification < Jobs::Base
-    ONESIGNALAPI = 'https://onesignal.com/api/v1/notifications'.freeze
+    ONESIGNALAPI = 'https://onesignal.com/api/v1/notifications'
 
     def execute(args)
       payload = args['payload']
@@ -10,8 +12,8 @@ module Jobs
       # The user who took action to trigger the notification
       actor_user = User.find_by(username: payload[:username])
 
-      Rails.logger.warn("Acted On User: #{acted_on_user.username}")
-      Rails.logger.warn("Actor User: #{actor_user.username}")
+      # Don't notify of any system generated notifications
+      return if actor_user.username == 'system'
 
       # Get the most recent post in the topic for which the notification was
       # triggered which is from the actor user. This is the post for which
@@ -43,8 +45,6 @@ module Jobs
         end
       end
 
-      Rails.logger.warn("Archetype: #{post.archetype}")
-
       redirect_uri = 'Explore'
       # If the post is a reply and the user of that post is the acted_on_user
       # and the post is specifically not a PM
@@ -59,7 +59,7 @@ module Jobs
             heading = "#{actor_user.name} liked your comment"
           end
         end
-      # Replied to your message (replied to you) and the post is specifically 
+      # Replied to your message (replied to you) and the post is specifically
       # not a PM
       elsif post.archetype != Archetype.private_message && topic.user_id == user_id
         # if original poster on topic is acted_on_user
@@ -132,9 +132,6 @@ module Jobs
         'filters' => filters
       }
 
-      Rails.logger.warn("Params Built")
-      Rails.logger.warn("#{params.to_yaml}")
-
       uri = URI.parse(ONESIGNALAPI)
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true if uri.scheme == 'https'
@@ -146,7 +143,7 @@ module Jobs
       response = http.request(request)
 
       case response
-      when Net::HTTPSuccess then
+      when Net::HTTPSuccess
         Rails.logger.info("Push notification sent via OneSignal to #{args['username']}.")
       else
         Rails.logger.error('OneSignal error')
